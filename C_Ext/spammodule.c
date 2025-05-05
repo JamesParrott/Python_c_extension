@@ -16,59 +16,6 @@
 // https://docs.python.org/3/extending/extending.html#intermezzo-errors-and-exceptions
 static PyObject *SpamError;
 
-// "your module's initialization function".
-//  "initializes" SpamError "with an exception object".
-//
-// "When the Python program imports module spam for 
-// the first time, PyInit_spam() is called. "
-// "It calls PyModule_Create(), which returns a module object, 
-// and inserts built-in function objects into the newly created 
-// module based upon the table (an array of PyMethodDef structures) 
-// found in the module definition. PyModule_Create() returns a 
-// pointer to the module object that it creates. It may abort 
-// with a fatal error for certain errors, or return NULL if the 
-// module could not be initialized satisfactorily. The init function 
-// must return the module object to its caller, so that it then gets 
-// inserted into sys.modules."
-PyMODINIT_FUNC
-PyInit_spam(void)
-{
-    PyObject *m;
-
-    m = PyModule_Create(&spammodule);
-    if (m == NULL)
-        return NULL;
-
-
-    // "Note that the Python name for the exception object is spam.error. 
-    // The PyErr_NewException() function may create a class with the 
-    // base class being Exception (unless another class is passed in 
-    // instead of NULL), described in Built-in Exceptions."
-
-    // "Note also that the SpamError variable retains a reference to 
-    // the newly created exception class; this is intentional! Since 
-    // the exception could be removed from the module by external code, 
-    // an owned reference to the class is needed to ensure that it 
-    // will not be discarded, causing SpamError to become a dangling 
-    // pointer. Should it become a dangling pointer, C code which 
-    // raises the exception could cause a core dump or other 
-    // unintended side effects."
-
-    SpamError = PyErr_NewException("spam.error", NULL, NULL);
-    if (PyModule_AddObjectRef(m, "error", SpamError) < 0) {
-        Py_CLEAR(SpamError);
-        Py_DECREF(m);
-        return NULL;
-    }
-
-    return m;
-}
-// When embedding Python, the PyInit_spam() function is not called 
-// automatically unless there's an entry in the PyImport_Inittab table. 
-// To add the module to the initialization table, use 
-// PyImport_AppendInittab(), optionally followed by an import of 
-// the module...
-
 // the C function that will be called when the 
 // Python expression spam.system(string) is evaluated
 static PyObject *
@@ -122,10 +69,10 @@ spam_system(PyObject *self, PyObject *args)
 // First, we need to list its name and address in a "method table":"
 
 static PyMethodDef SpamMethods[] = {
-    ...
+    // ...
     {"system",  spam_system, METH_VARARGS,
      "Execute a shell command."},
-    ...
+    // ...
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
@@ -144,14 +91,73 @@ static PyMethodDef SpamMethods[] = {
 
 // "The method table must be referenced in the module definition structure:"
 
+
+
+// spammodule is referred to in PyInit_spam, where it is passed to the interpreter.
 static struct PyModuleDef spammodule = {
     PyModuleDef_HEAD_INIT,
     "spam",   /* name of module */
-    spam_doc, /* module documentation, may be NULL */
+    NULL, //spam_doc, /* module documentation, may be NULL */
     -1,       /* size of per-interpreter state of the module,
                  or -1 if the module keeps state in global variables. */
     SpamMethods
 };
 
-// spammodule referred to in PyInit_spam, where it is passed to the interpreter.
+
+
+
+
+// "your module's initialization function".
+//  "initializes" SpamError "with an exception object".
+//
+// "When the Python program imports module spam for 
+// the first time, PyInit_spam() is called. "
+// "It calls PyModule_Create(), which returns a module object, 
+// and inserts built-in function objects into the newly created 
+// module based upon the table (an array of PyMethodDef structures) 
+// found in the module definition. PyModule_Create() returns a 
+// pointer to the module object that it creates. It may abort 
+// with a fatal error for certain errors, or return NULL if the 
+// module could not be initialized satisfactorily. The init function 
+// must return the module object to its caller, so that it then gets 
+// inserted into sys.modules."
+PyMODINIT_FUNC PyInit_spam(void)
+{
+    PyObject *m;
+
+    m = PyModule_Create(&spammodule);
+    if (m == NULL)
+        return NULL;
+
+
+    // "Note that the Python name for the exception object is spam.error. 
+    // The PyErr_NewException() function may create a class with the 
+    // base class being Exception (unless another class is passed in 
+    // instead of NULL), described in Built-in Exceptions."
+
+    // "Note also that the SpamError variable retains a reference to 
+    // the newly created exception class; this is intentional! Since 
+    // the exception could be removed from the module by external code, 
+    // an owned reference to the class is needed to ensure that it 
+    // will not be discarded, causing SpamError to become a dangling 
+    // pointer. Should it become a dangling pointer, C code which 
+    // raises the exception could cause a core dump or other 
+    // unintended side effects."
+
+    SpamError = PyErr_NewException("spam.error", NULL, NULL);
+    if (PyModule_AddObjectRef(m, "error", SpamError) < 0) {
+        Py_CLEAR(SpamError);
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    return m;
+}
+// "When embedding Python, the PyInit_spam() function is not called 
+// automatically unless there's an entry in the PyImport_Inittab table. 
+// To add the module to the initialization table, use 
+// PyImport_AppendInittab(), optionally followed by an import of 
+// the module...  "
+
+
 
