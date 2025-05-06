@@ -1,3 +1,4 @@
+# https://setuptools.pypa.io/en/latest/userguide/ext_modules.html
 # pyproject.toml
 [build-system]
 requires = ["setuptools"]
