@@ -13,6 +13,6 @@ Build the version in ./setuptools_ext with pyproject-build in a matter of second
 
 Or build CPython from source in a matter of minutes, copy the contents of ./C_ext into the CPython repo's ./Modules, and then build in a matter of seconds (run "Make" in the CPython repo's root).
 
-Tested on Ubuntu 24.04 (on ARM).
+Tested on Ubuntu 24.04 (on ARM) with gcc.
 
 I am not claiming Copyright over the other files, as it is not mine to claim.
